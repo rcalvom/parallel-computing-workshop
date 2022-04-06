@@ -30,10 +30,9 @@
  * @return Exit status
  */
 int main(int argc, char* argv[]){
-
-    if(argc != 4){
-        perror("The program has not enoguth argumens. Aborting.");
-        exit(-1);
+    if(argc != 5){
+        perror("The program has not enought arguments. Aborting.");
+        exit(EXIT_FAILURE);
     }
 
     char* input_filename = argv[1];
