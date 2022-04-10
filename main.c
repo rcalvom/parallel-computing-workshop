@@ -59,7 +59,7 @@ int main(int argc, char* argv[]){
     gettimeofday(&end, NULL);
     stopwatch = (double)(end.tv_sec + (double) end.tv_usec / 1000000) - (double)(start.tv_sec + (double) start.tv_usec / 1000000);
 
-    printf("The program has finished sucessfully\n");
+    printf("The program has finished sucessfully.\n");
     printf("Time execution: %f\n", stopwatch);
 
     return 0;

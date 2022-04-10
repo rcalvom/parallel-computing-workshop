@@ -14,25 +14,51 @@ threads=(1 2 4 8 16)
 # filter intensity
 filter_intensity=1.0
 
-# Script
+# Script start
 echo -e "Execute test script"
-echo
+echo -e
 
+# Compile border detection program
 echo -e "${blue}Compiling program...${end_color}"
 make build
 echo -e "${green}Done${end_color}"
-echo
+echo -e
 
+# Create the output images folder if it does not exit
+echo -e "${blue}Creating output_images folder...${end_color}"
+mkdir -p output_images 
+echo -e "${green}Done${end_color}"
+echo -e
+
+# Create folder with the outputs of executions
+echo -e "${blue}Creating output execution folder...${end_color}"
+mkdir -p report/out
+echo -e "${green}Done${end_color}"
+echo -e
+
+# Create folder for plot generation
+echo -e "${blue}Creating plots folder...${end_color}"
+mkdir -p report/plots
+echo -e "${green}Done${end_color}"
+echo -e
+
+# Execute all test cases and save their results in the output folder
 for size in "${sizes[@]}"
 do
     for thread in "${threads[@]}"
     do
         echo -e "${blue}Size: $size, Threads: $thread ${end_color}"
         echo -e "${blue}Executing test...${end_color}"
-        ./border_detection input_images/$size.jpg output_images/$size.jpg 1 $filter_intensity
+        OUTPUT=`./border_detection input_images/$size.jpg output_images/$size.jpg $filter_intensity $threads`
+        echo -e ${OUTPUT}
+        echo -e ${OUTPUT} >> report/out/"border_detection_${size}_${thread}.out"
         echo -e "${green}Done${end_color}"
-        echo
+        echo -e
     done
 done
 
-
+# Execute Python script that generate plots and compile the LaTeX report
+echo -e "${blue}Creating plots and compilig report...${end_color}"
+python3 report/report.py
+echo -e "${green}Done${end_color}"
+echo -e

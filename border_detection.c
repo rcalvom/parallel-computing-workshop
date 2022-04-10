@@ -83,7 +83,7 @@ void border_detection_filter(char* input_filename, char* output_filename, double
         pthread_join(tfd[i], NULL);
     }
     /**
-     * @brief Create and execute the threads to apply border filter the image
+     * @brief Create and execute the threads to apply border filter to the image
      * 
      */
     for(int i = 0; i < threads_count; i++){
