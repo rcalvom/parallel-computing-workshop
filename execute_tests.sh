@@ -5,6 +5,12 @@ green="\e[32m"
 blue="\e[34m"
 end_color="\e[0m"
 
+# Image sizes
+sizes=("4k" "1080p" "720p")
+
+# Thread counts
+threads=(1 2 4 8 16)
+
 # filter intensity
 filter_intensity=1.0
 
@@ -37,125 +43,19 @@ echo -e "${green}Done${end_color}"
 echo -e
 
 # Execute all test cases and save their results in the output folder
-echo -e "${blue}Size: 4k, Threads: 1 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/4k.jpg output_images/4k.jpg $filter_intensity 1`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_4k_1.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 4k, Threads: 2 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/4k.jpg output_images/4k.jpg $filter_intensity 2`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_4k_2.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 4k, Threads: 4 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/4k.jpg output_images/4k.jpg $filter_intensity 4`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_4k_4.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 4k, Threads: 8 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/4k.jpg output_images/4k.jpg $filter_intensity 8`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_4k_8.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 4k, Threads: 16 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/4k.jpg output_images/4k.jpg $filter_intensity 16`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_4k_16.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 1080p, Threads: 1 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/1080p.jpg output_images/1080p.jpg $filter_intensity 1`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_1080p_1.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 1080p, Threads: 2 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/1080p.jpg output_images/1080p.jpg $filter_intensity 2`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_1080p_2.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 1080p, Threads: 4 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/1080p.jpg output_images/1080p.jpg $filter_intensity 4`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_1080p_4.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 1080p, Threads: 8 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/1080p.jpg output_images/1080p.jpg $filter_intensity 8`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_1080p_8.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 1080p, Threads: 16 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/1080p.jpg output_images/1080p.jpg $filter_intensity 16`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_1080p_16.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 720p, Threads: 1 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/720p.jpg output_images/720p.jpg $filter_intensity 1`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_720p_1.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 720p, Threads: 2 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/720p.jpg output_images/720p.jpg $filter_intensity 2`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_720p_2.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 720p, Threads: 4 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/720p.jpg output_images/720p.jpg $filter_intensity 4`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_720p_4.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 720p, Threads: 8 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/720p.jpg output_images/720p.jpg $filter_intensity 8`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_720p_8.out"
-echo -e "${green}Done${end_color}"
-echo -e
-
-echo -e "${blue}Size: 720p, Threads: 16 ${end_color}"
-echo -e "${blue}Executing test...${end_color}"
-OUTPUT=`./border_detection input_images/720p.jpg output_images/720p.jpg $filter_intensity 16`
-echo -e ${OUTPUT}
-echo -e ${OUTPUT} >> report/out/"border_detection_720p_16.out"
-echo -e "${green}Done${end_color}"
-echo -e
+for size in "${sizes[@]}"
+do
+    for thread in "${threads[@]}"
+    do
+        echo -e "${blue}Size: $size, Threads: $thread ${end_color}"
+        echo -e "${blue}Executing test...${end_color}"
+        OUTPUT=`./border_detection input_images/$size.jpg output_images/$size.jpg $filter_intensity $thread`
+        echo -e ${OUTPUT}
+        echo -e ${OUTPUT} >> report/out/"border_detection_${size}_${thread}.out"
+        echo -e "${green}Done${end_color}"
+        echo -e
+    done
+done
 
 # Execute Python script that generate plots and compile the LaTeX report
 echo -e "${blue}Creating plots and compilig report...${end_color}"
