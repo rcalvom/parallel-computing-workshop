@@ -3,3 +3,4 @@ report/out/*
 report/plots/*
 border_detection
 .vscode
+venv/
