@@ -3,9 +3,6 @@
 # Matplotlib
 from matplotlib import pyplot as plt
 
-# PyLatex
-from pylatex import Document
-
 # Numpy
 import numpy as np
 
@@ -53,15 +50,6 @@ def generate_plots():
     print('Plots generated successfully')
 
 
-def generate_report():
-    """Generate report using LaTeX"""
-    doc = Document()
-    doc.generate_pdf(filepath=cd + '/report_filter_application',
-                     compiler='pdflatex', clean_tex=False)
-    print('Report generated successfully')
-
-
 if __name__ == '__main__':
     """Main method"""
     generate_plots()
-    generate_report()

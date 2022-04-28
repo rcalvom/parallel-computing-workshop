@@ -57,8 +57,14 @@ do
     done
 done
 
-# Execute Python script that generate plots and compile the LaTeX report
-echo -e "${blue}Creating plots and compilig report...${end_color}"
+# Execute Python script that generate plots
+echo -e "${blue}Creating plots...${end_color}"
 python3 report/report.py
+echo -e "${green}Done${end_color}"
+echo -e
+
+# Compile LaTeX project
+echo -e "${blue}Compiling pdf report...${end_color}"
+: $(cd report/template && pdflatex --jobname=report  main.tex)
 echo -e "${green}Done${end_color}"
 echo -e

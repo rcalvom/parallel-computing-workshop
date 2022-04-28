@@ -4,3 +4,8 @@ report/plots/*
 border_detection
 .vscode
 venv/
+*.aux
+*.log
+*.out
+*.run.xml
+*.bcf

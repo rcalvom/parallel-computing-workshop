@@ -1,0 +1,33 @@
+% Titulo.
+\DeclareRobustCommand{\titlecontent}{
+    % Contenido de la sección de titulo.
+    \begin{center}
+        \Huge \textbf{Implementación de un efecto sobre una imagen} \\  \hfill \break
+        \large Práctica 1 \\  \hfill \break
+    \end{center}
+}
+
+% Autores.
+\DeclareRobustCommand{\authorcontent}{
+    % Contenido de la sección de autores.
+    \begin{center}
+        \normalsize Ricardo Andrés Calvo Méndez, Jorge Aurelio Morales Manrique \\ \hfill \break
+        \small \textit{Universidad Nacional de Colombia} \\
+        \small \textit{Bogotá, Colombia}\\ \hfill \break
+        \texttt{\href{mailto:rcalvom@unal.edu.co}{rcalvom@unal.edu.co}}\\
+        \texttt{\href{mailto:jomorales@unal.edu.co}{jomorales@unal.edu.co}}\\
+    \end{center}
+}
+
+% Fecha.
+\DeclareRobustCommand{\datecontent}{
+    % Contenido de la sección de fecha.
+    \begin{center}
+        \scriptsize \today \normalsize
+    \end{center}
+}
+
+% Asignación de los comandos.
+\title{\titlecontent}
+\author{\authorcontent}
+\date{\datecontent}
