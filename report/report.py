@@ -40,13 +40,13 @@ def generate_plots():
         ax1.set(xlabel='Number of threads', ylabel='Response time (s)',
                 title='N° of Threads vs Response Time')
         ax1.grid()
-        fig1.savefig(cd + f'/plots/{i_type}_response_time.png')
+        fig1.savefig(cd + f'/plots/omp_{i_type}_response_time.png')
         fig2, ax2 = plt.subplots()
         ax2.plot(threads, speedup)
         ax2.set(xlabel='Number of threads', ylabel='Speedup (s)',
                 title='N° of Threads vs Speedup')
         ax2.grid()
-        fig2.savefig(cd + f'/plots/{i_type}_speedup.png')
+        fig2.savefig(cd + f'/plots/omp_{i_type}_speedup.png')
     print('Plots generated successfully')
 
 
