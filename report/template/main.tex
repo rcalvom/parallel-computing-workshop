@@ -203,6 +203,7 @@ En este caso nuevamente tenemos una irregularidad en las ejecuciones con 8 y 16 
 \end{figure}
 
 Finalmente en este caso encontramos la irregularidad que ya se mencionó en las ejecuciones con 8 y 16 hilos, además notamos que nuevamente el speed up en los casos de 4 núcleos es muy similar al speed up en los casos de 4k y 1080p debido a que se paraleliza la misma proporción de código.
+De acuerdo a las gráficas de tiempo de respuesta y speedup se puede observar que los valores obtenidos de la ejecución usando OpenMP tienen una reducción en escala de milisegundos en comparación al algoritmo implementado usando POSIX directamente. Esto se debe a que la interfaz que provee OpenMP realiza optimizaciones en tiempo de compilación.
 
 \section{Conclusiones}
 
