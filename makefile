@@ -1,7 +1,10 @@
 CC = gcc
+CU = nvcc
 
-build: main.c border_detection.c border_detection.h
-	@ $(CC) main.c border_detection.c -o border_detection -lm -fopenmp
+build: main.c border_detection.cu border_detection.h
+	@ $(CC) -c main.c -lm
+	@ $(CU) -c border_detection.cu -lm -arch=sm_35
+	@ $(CU) -o border_detection main.o border_detection.o -arch=sm_35
 
 clean: border_detection
 	@ rm border_detection

@@ -9,3 +9,4 @@ venv/
 *.out
 *.run.xml
 *.bcf
+*.o
