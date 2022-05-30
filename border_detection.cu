@@ -60,7 +60,7 @@ __global__ void border_detection_kernel(unsigned char* grayscale_image_device, u
     int start = image_size / threads_count * index;
     int end = image_size / threads_count * (index + 1);
 
-    /*for(int i = start; i < end; i++){
+    for(int i = start; i < end; i++){
         int p11 = (i % width == 0 || i < width) ? 0 : *(grayscale_image_device + i - width - 1);
         int p12 = (i < width) ? 0 : *(grayscale_image_device + i - width);
         int p13 = (i % width == width - 1 || i < width) ? 0 : *(grayscale_image_device + i - width + 1);
@@ -78,9 +78,6 @@ __global__ void border_detection_kernel(unsigned char* grayscale_image_device, u
         }else{
             *(output_image_device + i) = result;
         }
-    }*/
-    for(int i = start; i < end; i++){
-        *(output_image_device + i) = *(grayscale_image_device + i);
     }
 }
 
@@ -145,7 +142,7 @@ void border_detection_filter(char* input_filename, char* output_filename, double
      * @brief Execute grayscale kernel and check for errors
      * 
      */
-    grayscale_kernel<<<1, 1>>>(input_image_device, grayscale_image_device, image_size, threads_count);
+    grayscale_kernel<<<1, threads_count>>>(input_image_device, grayscale_image_device, image_size, threads_count);
     if (cudaGetLastError() != cudaSuccess){
         perror("Has been ocurr an error in kernel execution. Aborting");
         exit(EXIT_FAILURE);
@@ -155,7 +152,7 @@ void border_detection_filter(char* input_filename, char* output_filename, double
      * @brief Execute border detection kernel and check for errors
      * 
      */
-    border_detection_kernel<<<1, 1>>>(grayscale_image_device, output_image_device, width, height, filter_intensity, image_size, threads_count);
+    border_detection_kernel<<<1, threads_count>>>(grayscale_image_device, output_image_device, width, height, filter_intensity, image_size, threads_count);
     if (cudaGetLastError() != cudaSuccess){
         perror("Has been ocurr an error in kernel execution. Aborting");
         exit(EXIT_FAILURE);
