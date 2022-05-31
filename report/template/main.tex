@@ -14,20 +14,14 @@
 \input{abstract}
 
 \section{Introducción}
-La computación paralela es un paradigma de cómputo en el cual múltiples cálculos o procesos son ejecutados simultáneamente. Problemas grandes pueden ser divididos en problemas más pequeños que pueden ser ejecutados en diferentes unidades lógicas del procesador para obtener tiempos de ejecución más bajos. La computación paralela es ampliamente usada en el campo de ``high performance computing'' gracias a las ventajas que ofrece en la ejecución de algoritmos que cumplen con la condición de ser paralelizables. Una de las aplicaciones más reconocidas es el procesamiento de imágenes, por medio de la aplicación de filtros basados en kernels, debido a que las operaciones realizadas sobre los píxeles son independientes entre si, lo que permite hacer una división del cómputo entre varios hilos. El objetivo de esta práctica es aplicar el filtro de detección de bordes sobre imágenes con resoluciones 720p, 1080p y 4k, por medio de una implementación en lenguaje C que haga uso de la librería ``pthread.h'' para la ejecución con múltiples hilos. Finalmente se realiza el respectivo análisis de tiempo de respuesta y speedup para cada uno de los casos.
+La computación paralela es un paradigma de cómputo en el cual múltiples cálculos o procesos son ejecutados simultáneamente. Problemas grandes pueden ser divididos en problemas más pequeños que pueden ser ejecutados en diferentes unidades lógicas del procesador para obtener tiempos de ejecución más bajos. La computación paralela es ampliamente usada en el campo de ``high performance computing'' gracias a las ventajas que ofrece en la ejecución de algoritmos que cumplen con la condición de ser paralelizables. Una de las aplicaciones más reconocidas es el procesamiento de imágenes, por medio de la aplicación de filtros basados en kernels, debido a que las operaciones realizadas sobre los píxeles son independientes entre si, lo que permite hacer una división del cómputo entre varios hilos. El objetivo de esta práctica es aplicar el filtro de detección de bordes sobre imágenes con resoluciones 720p, 1080p y 4k, por medio de una implementación en lenguaje C que haga uso de la librería ``pthread.h'' para la ejecución con múltiples hilos, la interfaz de programación de aplicaciones multiproceso de memoria compartida OpenMP y la plataforma de computación paralela CUDA. Finalmente se realiza el respectivo análisis de tiempo de respuesta y speedup para los diferentes tamaños de imagen y los diferentes paradigmas (posix, OpenMP y CUDA).
 
 \section{Diseño del programa}
 La aplicación tiene 3 componentes principales:
 \begin{itemize}
     \item \textbf{Script de Bash:} realiza la ejecución del algoritmo en C para cada una de las imágenes de prueba variando el número de hilos con valores de 1, 2, 4, 8 y 16. Al finalizar cada caso almacena el tiempo de ejecución en un archivo de texto plano. Una vez se obtienen los resultados para cada caso de prueba se ejecuta el script en Python para la generación de las gráficas y el reporte.
     \item \textbf{Script en Python:} realiza la lectura de los archivos de resultados, agrupando los valores por tipo de imagen, para luego, haciendo uso de la librería \textbf{matplotlib} generar las gráficas correspondientes al tiempo de respuesta y speedup para las imágenes con resolución 720p, 1080p y 4k. Así mismo, el script compila el reporte latex con la última versión de gráficas generadas.
-    \item \textbf{Algoritmo en C:} contiene la implementación del filtro para detección de bordes el cual está descrito en el siguiente fragmento de pseudocódigo:
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.4\textwidth]{../plots/pseudocode.PNG}
-        \caption{Pseudocódigo algoritmo para detección de bordes}
-    \end{figure}
-    Las funciones ``rgb\_to\_grayscale'' y ``grayscale\_filter\_thread'' corresponden a la conversión de cada pixel de RGB a escala de grises, esto se realiza ya que para la detección de bordes no es necesario conocer los valores de color de los 3 canales, se requiere conocer la intensidad del pixel, por lo cual se usa la escala de grises. Las funciones ``border\_detection\_filter\_thread'' y ``border\_detection\_filter'' corresponden a la aplicación del filtro de detección de bordes para el cual el valor de cada pixel se calculo a través de una operación de convolución entre la matriz 3x3, que corresponde al pixel actual y sus vecinos, y el kernel el cual tiene los siguientes valores:
+    \item \textbf{Algoritmo en C:} contiene la implementación del filtro para detección de bordes. El kernel utilizado es el siguiente:
     \vspace{6mm}
     \begin{center}
         $\begin{pmatrix}
@@ -36,6 +30,19 @@ La aplicación tiene 3 componentes principales:
             -1 & -1 & -1
         \end{pmatrix}$
     \end{center}
+    A continuación se muestran fragmentos de psudocódigo para las implementaciones usando posix y OpenMP:
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{../plots/pseudocode.PNG}
+        \caption{Pseudocódigo algoritmo para detección de bordes usando posix}
+    \end{figure}
+    Las funciones ``rgb\_to\_grayscale'' y ``grayscale\_filter\_thread'' corresponden a la conversión de cada pixel de RGB a escala de grises, esto se realiza ya que para la detección de bordes no es necesario conocer los valores de color de los 3 canales, se requiere conocer la intensidad del pixel, por lo cual se usa la escala de grises. Las funciones ``border\_detection\_filter\_thread'' y ``border\_detection\_filter'' corresponden a la aplicación del filtro de detección de bordes para el cual el valor de cada pixel se calcula a través de una operación de convolución entre la matriz 3x3, que corresponde al pixel actual y sus vecinos, y el kernel.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{../plots/pseudocode_omp.PNG}
+        \caption{Pseudocódigo algoritmo para detección de bordes usando OpenMP}
+    \end{figure}
+    A diferencia del pseudocódigo anterior, en este caso se hace uso de dos funciones principales. En primer lugar ``rgb\_to\_grayscale'' que al igual que antes, tiene como propósito convertir un pixel de RBG a escala de grises. La segunda función realiza la conversión de la imagen a escala de grises para luego aplicar el filtro de detección de bordes con la operación de convolución para cada pixel.
     \newpage
     Las funciones para los filtros de escala de grises y detección de bordes son ejecutados utilizando múltiples hilos de acuerdo al argumento que indique el usuario. Para realizar la distribución de datos o balanceo de carga se utiliza el método blockwise (división de los datos en segmentos iguales), el cual se describe en el siguiente diagrama:
     \begin{figure}[H]
@@ -43,11 +50,17 @@ La aplicación tiene 3 componentes principales:
         \includegraphics[width=0.4\textwidth]{../plots/load_balancing.drawio.png}
         \caption{Método blockwise para balanceo de carga}
     \end{figure}
+    Así mismo en el caso de CUDA, se tiene el siguiente balanceo, teniendo en cuenta bloques e hilos:
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{../plots/load_balancing_cuda.drawio.png}
+        \caption{Balanceo de carga CUDA}
+    \end{figure}
 \end{itemize}
 
 \section{Experimentos}
 
-Para la ejecución del programa, se han escogido 3 imágenes diferentes con tamaños 4k, 1080p y 720p; a cada una de las imágenes les será aplicado el filtro de detección de bordes usando ejecución secuencial y ejecuciones paralelas de 2, 4, 8 y 16. Combinando los tres tamaños de las imágenes y los cuatro tipos de ejecución, en total serán 12 casos de prueba.
+Para la ejecución del programa, se han escogido 3 imágenes diferentes con tamaños 4k, 1080p y 720p; a cada una de las imágenes les será aplicado el filtro de detección de bordes usando ejecución secuencial y ejecuciones paralelas de 2, 4, 8 y 16. Combinando los tres tamaños de las imágenes y los cuatro tipos de ejecución, en total serán 12 casos de prueba. Para el caso de CUDA se aumenta el número de hilos a 32, 64 y 128 y se manejan número de bloques entre 1, 2, 4, 8, 16, 32 y 64, lo cual representa 56 casos de prueba por tipo de imagen.
 
 Las siguientes son las imágenes a las cuales se les va a aplicar el filtro:
 
@@ -73,9 +86,15 @@ Para la automatización de la ejecución de los anteriores casos de prueba se ut
 
 \section{Resultados}
 
-Para la ejecución de los casos de prueba mencionados anteriormente se ha utilizado un procesador AMD Ryzen 5 4500U el cuál cuenta con 6 núcleos a 2.3 GHz de frecuencia de reloj.
+Para la ejecución de los casos de prueba mencionados anteriormente se ha utilizado un procesador AMD Ryzen 5 4500U el cuál cuenta con 6 núcleos a 2.3 GHz de frecuencia de reloj en el caso de pthread y OpenMP, en cuanto a CUDA se hizo uso de un entorno de ejecución en Google Colab con una GPU de NVIDIA de las siguientes características:
 
-Los resultados obtenidos de ejecutar el filtro en las 3 imágenes mencionadas anteriormente son los siguientes:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/gpu_architecture.PNG}
+    \caption{Arquitectura de la GPU de NVIDIA}
+\end{figure}
+
+Los resultados obtenidos de ejecutar el filtro en las 3 imágenes mencionadas anteriormente usando posix, OpenMP y CUDA son los siguientes:
 
 \subsection{Imagen de tamaño 4k}
 
@@ -84,15 +103,27 @@ La imagen obtenida de aplicar el filtro es la siguiente:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{../plots/4k.out.jpg}
-    \caption{Miniatura de imagen con tamaño 4k con el filtro de detección de bordes aplicado.}
+    \caption{Miniatura de imagen con tamaño 4k con el filtro de detección de bordes aplicado usando posix.}
 \end{figure}
 
-Las gráficas que resumen y comparan los tiempo de respuesta y los speed up de la aplicación del filtro a esta imagen son los siguientes:
+Las gráficas que resumen y comparan los tiempo de respuesta y los speedup de la aplicación del filtro a esta imagen son los siguientes (en el caso de CUDA cada gráfica tiene múltiples lineas cada una indicando un número diferente de bloques):
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{../plots/4k_response_time.png}
-    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 4k}
+    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 4k usando posix}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/omp_4k_response_time.png}
+    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 4k usando OpenMP}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/cuda_4k_response_time.png}
+    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 4k usando CUDA}
 \end{figure}
 
 En este caso se puede observar como los tiempos de ejecución son siempre decrecientes, a pesar de tener únicamente 6 núcleos, los tiempos se redujeron inclusive usando 16 hilos con lo que se puede inferir que los tiempos del sistema operativo pudieron interferir positivamente en estos últimos casos. Sin embargo es bastante notorio como el uso de múltiples hilos para el procesamiento de la imagen, redujeron los tiempos de procesamiento desde un poco mas de 2.2 segundos hasta 1.3 segundos en el mejor caso.
@@ -100,7 +131,19 @@ En este caso se puede observar como los tiempos de ejecución son siempre decrec
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{../plots/4k_speedup.png}
-    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 4k}
+    \caption{Gráfica de speedup para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 4k usando posix}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/omp_4k_speedup.png}
+    \caption{Gráfica de speedup para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 4k usando OpenMP}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/cuda_4k_speedup.png}
+    \caption{Gráfica de speedup para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 4k usando CUDA}
 \end{figure}
 
 En el caso del speed up, se puede notar como este siempre es positivo mostrando una notoria mejora cuando se aumenta el uso de núcleos para el procesamiento de la imagen.
@@ -112,7 +155,7 @@ La imagen obtenida de aplicar el filtro es la siguiente:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{../plots/1080p.out.jpg}
-    \caption{Miniatura de imagen con tamaño 1080p con el filtro de detección de bordes aplicado.}
+    \caption{Miniatura de imagen con tamaño 1080p con el filtro de detección de bordes aplicado usando posix.}
 \end{figure}
 
 Las gráficas que resumen y comparan los tiempo de respuesta y los speed up de la aplicación del filtro a esta imagen son los siguientes:
@@ -120,7 +163,19 @@ Las gráficas que resumen y comparan los tiempo de respuesta y los speed up de l
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{../plots/1080p_response_time.png}
-    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 1080p}
+    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 1080p usando posix}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/omp_1080p_response_time.png}
+    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 1080p usando OpenMP}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/cuda_1080p_response_time.png}
+    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 1080p usando CUDA}
 \end{figure}
 
 En este caso llama la atención como en los casos de procesamiento con 8 y 16 núcleos los tiempos crecieron, esto se puede justificar en los 6 núcleos del procesador, en estos casos solo 6 hilos se ejecutaban al mismo tiempo mientras que los demás trabajaban su parte del filtro de manera concurrente.
@@ -128,7 +183,19 @@ En este caso llama la atención como en los casos de procesamiento con 8 y 16 n�
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{../plots/1080p_speedup.png}
-    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 1080p}
+    \caption{Gráfica de speedup para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 1080p usando posix}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/omp_1080p_speedup.png}
+    \caption{Gráfica de speedup para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 1080p usando OpenMP}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/cuda_1080p_speedup.png}
+    \caption{Gráfica de speedup para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 1080p usando CUDA}
 \end{figure}
 
 De manera similar a los tiempos de respuesta, el resultado para 8 y 16 hilos es irregular y se puede asumir esto debido a los 6 núcleos del procesador. Algo a tener en cuenta es que el speed up en el caso de la imagen 4k fue muy similar al caso de 720p, esto se puede justificar en que independiente mente del tamaño de la imagen siempre se va a estar paralelizando la misma proporción de código.
@@ -140,7 +207,7 @@ La imagen obtenida de aplicar el filtro es la siguiente:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{../plots/720p.out.jpg}
-    \caption{Miniatura de imagen con tamaño 720 con el filtro de detección de bordes aplicado.}
+    \caption{Miniatura de imagen con tamaño 720 con el filtro de detección de bordes aplicado usando posix.}
 \end{figure}
 
 Las gráficas que resumen y comparan los tiempo de respuesta y los speed up de la aplicación del filtro a esta imagen son los siguientes:
@@ -148,7 +215,19 @@ Las gráficas que resumen y comparan los tiempo de respuesta y los speed up de l
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{../plots/720p_response_time.png}
-    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 720p}
+    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 720p usando posix}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/omp_720p_response_time.png}
+    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 720p usando OpenMP}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/cuda_720p_response_time.png}
+    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 720p usando CUDA}
 \end{figure}
 
 En este caso nuevamente tenemos una irregularidad en las ejecuciones con 8 y 16 hilos que se justifican con los 6 núcleos del procesador, los tiempos de ejecución total del programa para tamaño 720p están en el orden de 100 ms, por lo que los tiempos del sistema operativo pueden estar interfiriendo con los resultados.
@@ -156,7 +235,19 @@ En este caso nuevamente tenemos una irregularidad en las ejecuciones con 8 y 16 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{../plots/720p_speedup.png}
-    \caption{Gráfica de tiempos de respuesta para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 720p}
+    \caption{Gráfica de speedup para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 720p usando posix}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/omp_720p_speedup.png}
+    \caption{Gráfica de speedup para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 720p usando OpenMP}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{../plots/cuda_720p_speedup.png}
+    \caption{Gráfica de speedup para las ejecuciones de la aplicación del filtro sobre la imagen de tamaño 720p usando CUDA}
 \end{figure}
 
 Finalmente en este caso encontramos la irregularidad que ya se mencionó en las ejecuciones con 8 y 16 hilos, además notamos que nuevamente el speed up en los casos de 4 núcleos es muy similar al speed up en los casos de 4k y 1080p debido a que se paraleliza la misma proporción de código.
@@ -167,6 +258,9 @@ Finalmente en este caso encontramos la irregularidad que ya se mencionó en las 
     \item La aplicación de filtros sobre imágenes son procesos altamente paralelizables debido a que cada proceso realizado sobre cada pixel es independiente de los demás.
     \item Las gráficas de speed up permiten identificar el límite de eficiencia que se puede alcanzar al paralelizar el algoritmo de detección de bordes. Estos resultados están sustentados bajo la ley de Amdahl, la cual establece un límite de speed up a medida que se aumenta el número de hilos usados en la ejecución.
     \item Los tiempos del sistema operativo afectan considerablemente los tiempos de ejecución de un programa cuando sus tiempos son muy cortos.
+    \item OpenMP es una interfaz de programación que simplifica en gran medida el desarrollo de programas multihilo por medio de directivas y un conjunto de funciones. Es una herramienta muy útil que acelera el desarrollo y abstrae elementos de diseño del programa por medio de múltiples elementos en el core de la librería.
+    \item Los tiempos de ejecución usando POSIX y OpenMP no varian significativamente, sin embargo, se pudo observar en los resultados que el programa ejecutado con OpenMP presenta tiempos menores del orden de milesimas de segundo.
+    \item CUDA provee una interfaz de programación paralela la cual presenta múltiples opciones para adaptar algoritmos que requieren un número elevado de cálculos para obtener un resultado, con las pruebas realizadas se demostró que al hacer uso de una GPU con un número significativo de cores representa un speedup elevado en comparación a los otros 2 paradigmas utilizados.
 \end{itemize}
 
 \end{document}
