@@ -11,7 +11,8 @@ import os
 
 
 cd = os.path.dirname(os.path.abspath(__file__))
-threads = [1, 2, 4, 8, 16]
+blocks = [1, 2, 4, 8, 16, 32, 64]
+threads = [1, 2, 4, 8, 16, 32, 64, 128]
 
 
 def generate_plots():
@@ -19,34 +20,43 @@ def generate_plots():
     results = {}
     for element in os.listdir(cd + '/out'):
         filename_parts = element.split('.')[0].split('_')
-        image_type = filename_parts[-2]
+        if len(filename_parts) < 5:
+            continue
+        image_type = filename_parts[-3]
         if image_type not in results.keys():
             results[image_type] = {}
+        n_blocks = int(filename_parts[-2])
         n_threads = int(filename_parts[-1])
-        if n_threads not in results[image_type].keys():
-            results[image_type][n_threads] = []
+        if n_blocks not in results[image_type].keys():
+            results[image_type][n_blocks] = {}
+        if n_threads not in results[image_type][n_blocks].keys():
+            results[image_type][n_blocks][n_threads] = []
         with open(cd + f'/out/{element}', 'r', encoding='utf-8') as r_file:
             for line in r_file.readlines():
-                results[image_type][n_threads].append(
+                results[image_type][n_blocks][n_threads].append(
                     float(line.strip().split()[-1]))
     for i_type, i_results in results.items():
-        seq_time = np.average(i_results[1])
-        par_times = []
-        for thread in threads:
-            par_times.append(np.average(i_results[thread]))
-        speedup = [seq_time / par_time for par_time in par_times]
         fig1, ax1 = plt.subplots()
-        ax1.plot(threads, par_times)
         ax1.set(xlabel='Number of threads', ylabel='Response time (s)',
-                title='N° of Threads vs Response Time')
+                title=f'N° of Threads vs Response Time ({i_type})')
         ax1.grid()
-        fig1.savefig(cd + f'/plots/{i_type}_response_time.png')
         fig2, ax2 = plt.subplots()
-        ax2.plot(threads, speedup)
         ax2.set(xlabel='Number of threads', ylabel='Speedup (s)',
-                title='N° of Threads vs Speedup')
+                title=f'N° of Threads vs Speedup ({i_type})')
         ax2.grid()
-        fig2.savefig(cd + f'/plots/{i_type}_speedup.png')
+        seq_time = np.average(i_results[1][1])
+        for block_count, b_results in i_results.items():
+            par_times = []
+            for thread in threads:
+                par_times.append(np.average(b_results[thread]))
+            speedup = [seq_time / par_time for par_time in par_times]
+            label = f'{block_count} blocks' if block_count > 1 else f'{block_count} block'
+            ax1.plot(threads, par_times, label=label)
+            ax2.plot(threads, speedup, label=label)
+        ax1.legend()
+        ax2.legend()
+        fig1.savefig(cd + f'/plots/cuda_{i_type}_response_time.png')
+        fig2.savefig(cd + f'/plots/cuda_{i_type}_speedup.png')
     print('Plots generated successfully')
 
 
