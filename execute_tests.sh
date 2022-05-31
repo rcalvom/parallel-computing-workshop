@@ -8,8 +8,11 @@ end_color="\e[0m"
 # Image sizes
 sizes=("4k" "1080p" "720p")
 
+# Block counts
+blocks=(1 2 4 8 16 32 64)
+
 # Thread counts
-threads=(1 2 4 8 16)
+threads=(1 2 4 8 16 32 64 128)
 
 # filter intensity
 filter_intensity=1.0
@@ -45,15 +48,18 @@ echo -e
 # Execute all test cases and save their results in the output folder
 for size in "${sizes[@]}"
 do
-    for thread in "${threads[@]}"
+    for block in "${blocks[@]}"
     do
-        echo -e "${blue}Size: $size, Threads: $thread ${end_color}"
-        echo -e "${blue}Executing test...${end_color}"
-        OUTPUT=`./border_detection input_images/$size.jpg output_images/$size.jpg $filter_intensity $thread`
-        echo -e ${OUTPUT}
-        echo -e ${OUTPUT} >> report/out/"border_detection_${size}_${thread}.out"
-        echo -e "${green}Done${end_color}"
-        echo -e
+        for thread in "${threads[@]}"
+        do
+            echo -e "${blue}Size: $size, Blocks: $block, Threads: $thread ${end_color}"
+            echo -e "${blue}Executing test...${end_color}"
+            OUTPUT=`./border_detection input_images/$size.jpg output_images/$size.jpg $filter_intensity $block $thread`
+            echo -e ${OUTPUT}
+            echo -e ${OUTPUT} >> report/out/"border_detection_${size}_${block}_${thread}.out"
+            echo -e "${green}Done${end_color}"
+            echo -e
+        done
     done
 done
 
