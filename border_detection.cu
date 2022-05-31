@@ -52,11 +52,11 @@ extern "C" {
  * @param thread_count number of threads executed
  */
 __global__ void grayscale_kernel(unsigned char* input_image_device, unsigned char* grayscale_image_device, size_t image_size, int block_count, int thread_count) {
-    int index = (blockDim.x * blockIdx.x) + threadIdx.x; 
-    int start = image_size / (block_count * thread_count) * index;
-    int end = image_size / (block_count * thread_count) * (index + 1);
+    long index = (blockDim.x * blockIdx.x) + threadIdx.x; 
+    long start = image_size / (block_count * thread_count) * index;
+    long end = image_size / (block_count * thread_count) * (index + 1);
 
-    for(int i = start; i < end; i++){
+    for(long i = start; i < end; i++){
         *(grayscale_image_device + i) = 0.299 * *(input_image_device + 3 * i) + 0.587 * *(input_image_device + 3 * i + 1) + 0.114 * *(input_image_device + 3 * i + 2);
     }
 
@@ -72,12 +72,11 @@ __global__ void grayscale_kernel(unsigned char* input_image_device, unsigned cha
  * @param thread_count number of threads executed
  */
 __global__ void border_detection_kernel(unsigned char* grayscale_image_device, unsigned char* output_image_device, int width, int height, double filter_intensity, size_t image_size, int block_count, int thread_count) {
-    int index = (blockDim.x * blockIdx.x) + threadIdx.x;
-    int start = image_size / (block_count * thread_count) * index;
-    int end = image_size / (block_count * thread_count) * (index + 1);
-    printf("%i\n", end);
+    long index = (blockDim.x * blockIdx.x) + threadIdx.x;
+    long start = image_size / (block_count * thread_count) * index;
+    long end = image_size / (block_count * thread_count) * (index + 1);
 
-    for(int i = start; i < end; i++){
+    for(long i = start; i < end; i++){
         int p11 = (i % width == 0 || i < width) ? 0 : *(grayscale_image_device + i - width - 1);
         int p12 = (i < width) ? 0 : *(grayscale_image_device + i - width);
         int p13 = (i % width == width - 1 || i < width) ? 0 : *(grayscale_image_device + i - width + 1);
@@ -165,6 +164,7 @@ void border_detection_filter(char* input_filename, char* output_filename, double
     gettimeofday(&start, NULL);
 
     grayscale_kernel<<<block_count, thread_count>>>(input_image_device, grayscale_image_device, image_size, block_count, thread_count);
+    cudaDeviceSynchronize();
     if (cudaGetLastError() != cudaSuccess){
         perror("Has been ocurr an error in kernel execution. Aborting");
         exit(EXIT_FAILURE);
@@ -175,6 +175,7 @@ void border_detection_filter(char* input_filename, char* output_filename, double
      * 
      */
     border_detection_kernel<<<block_count, thread_count>>>(grayscale_image_device, output_image_device, width, height, filter_intensity, image_size, block_count, thread_count);
+    cudaDeviceSynchronize();
     if (cudaGetLastError() != cudaSuccess){
         perror("Has been ocurr an error in kernel execution. Aborting");
         exit(EXIT_FAILURE);
@@ -191,7 +192,7 @@ void border_detection_filter(char* input_filename, char* output_filename, double
      * 
      */
     cudaMemcpy(output_image, output_image_device, image_size, cudaMemcpyDeviceToHost);
-
+    cudaDeviceSynchronize();
     /**
      * @brief Save the generated image to a file
      * 
