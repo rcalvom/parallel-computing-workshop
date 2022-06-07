@@ -41,6 +41,12 @@
  * @param thread_count Number of Threds executed
  */
 void matrix_multiplication(char * matrix_a_filename, char* matrix_b_filename, char* matrix_c_filename, int matrix_size, int thread_count){
+    /**
+     * @brief Generate matrices with random data
+     * 
+     */
+    generate_matrix(matrix_a_filename, matrix_size);
+    generate_matrix(matrix_b_filename, matrix_size);
 
     /**
      * @brief Load matrices from files
