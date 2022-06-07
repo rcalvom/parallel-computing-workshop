@@ -39,8 +39,30 @@ extern "C" {
 }
 
 
+/**
+ * @brief Multiply Matrices Cuda Kernel
+ * 
+ * @param matrix_a Matrix A
+ * @param matrix_b Matrix B
+ * @param matrix_c Matrix C
+ * @param matrix_size Matrix size
+ * @param block_count Number of blocks to execute
+ * @param thread_count Number of threads to execute per block
+ */
 __global__ void multiply_matrices_kernel(int* matrix_a, int* matrix_b, int* matrix_c, int matrix_size, int block_count, int thread_count){
+    long id = (blockDim.x * blockIdx.x) + threadIdx.x;
+    long start = (matrix_size * matrix_size) / (block_count * thread_count) * id;
+    long end = (matrix_size * matrix_size) / (block_count * thread_count) * (id + 1);
 
+    for(long index = start; i < end; i++){
+        int i = index / matrix_size;
+        int j = index % matrix_size;
+        int value = 0;
+        for(int k = 0; k < matrix_size; k++){
+            value += *(matrix_a + ( i * matrix_size) + k) * *(matrix_b + (matrix_size * k) + j);
+        }
+        *(matrix_c + (i * matrix_size) + j) = value;
+    }    
 }
 
 
