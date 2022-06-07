@@ -1,4 +1,4 @@
-output_images/*
+output_matrices/*
 report/out/*
 report/plots/*
 matrix_multiplication

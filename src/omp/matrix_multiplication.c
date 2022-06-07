@@ -112,6 +112,8 @@ int* multiply_matrices(int* matrix_a, int* matrix_b, int matrix_size, int thread
         perror("The memory couldn't be allocated. Aborting");
         exit(EXIT_FAILURE);
     }
+    omp_set_num_threads(thread_count);
+    #pragma omp parallel for
     for(int index = 0; index < matrix_size * matrix_size; index++){
         int i = index / matrix_size;
         int j = index % matrix_size;
@@ -145,9 +147,3 @@ void save_matrix(int* matrix, char* matrix_filename, int matrix_size){
     }
     fclose(file);
 }
-
-
-
-
-
-
