@@ -1,7 +1,7 @@
 output_images/*
 report/out/*
 report/plots/*
-border_detection
+matrix_multiplication
 .vscode
 venv/
 *.aux
