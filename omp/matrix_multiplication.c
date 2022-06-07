@@ -53,7 +53,18 @@ void matrix_multiplication(char * matrix_a_filename, char* matrix_b_filename, ch
      * @brief Multiply matrices
      * 
      */
+
+    struct timeval start, end;
+    double stopwatch;
+    gettimeofday(&start, NULL);
+
     int* matrix_c = multiply_matrices(matrix_a, matrix_b, matrix_size, thread_count);
+
+    gettimeofday(&end, NULL);
+    stopwatch = (double)(end.tv_sec + (double) end.tv_usec / 1000000) - (double)(start.tv_sec + (double) start.tv_usec / 1000000);
+
+    printf("The matrix multiplication has finished.\n");
+    printf("Time execution: %f\n", stopwatch);
 
     /**
      * @brief Save result
