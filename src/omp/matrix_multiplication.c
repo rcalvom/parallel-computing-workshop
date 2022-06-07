@@ -112,14 +112,14 @@ int* multiply_matrices(int* matrix_a, int* matrix_b, int matrix_size, int thread
         perror("The memory couldn't be allocated. Aborting");
         exit(EXIT_FAILURE);
     }
-    for(int i = 0; i < matrix_size; i++){
-        for(int j = 0; j < matrix_size; j++){
-            int value = 0;
-            for(int k = 0; k < matrix_size; k++){
-                value += *(matrix_a + ( i * matrix_size) + k) * *(matrix_b + (matrix_size * k) + j);
-            }
-            *(matrix_c + (i * matrix_size) + j) = value;
+    for(int index = 0; index < matrix_size * matrix_size; index++){
+        int i = index / matrix_size;
+        int j = index % matrix_size;
+        int value = 0;
+        for(int k = 0; k < matrix_size; k++){
+            value += *(matrix_a + ( i * matrix_size) + k) * *(matrix_b + (matrix_size * k) + j);
         }
+        *(matrix_c + (i * matrix_size) + j) = value;
     }
     return matrix_c;
 }
