@@ -82,6 +82,30 @@ void matrix_multiplication(char * matrix_a_filename, char* matrix_b_filename, ch
 }
 
 /**
+ * @brief Generate matrix with random numbers and saves it to a TXT file.
+ * Columns are separated by spaces
+ * Rows are separated by new lines
+ * 
+ * @param matrix_size Matrix size
+ * @return Generated matrix
+ */
+void generate_matrix(char* matrix_filename, int matrix_size) {
+    FILE* file = fopen(matrix_filename, "w");
+    if(file == NULL){
+        perror("The file couldn't be opened. Aborting");
+        exit(EXIT_FAILURE);
+    }
+    for (int i = 0; i < matrix_size; i++) {
+        for (int j = 0; j < matrix_size; j++) {
+            int element = (rand() % 40);
+            fprintf(file, "%d ", element);
+        }
+        fprintf(file, "\n");
+    }
+    fclose(file);
+}
+
+/**
  * @brief Load Matrix from TXT file.
  * Columns are separated by spaces
  * Rows are separated by new lines

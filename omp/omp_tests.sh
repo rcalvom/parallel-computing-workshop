@@ -8,8 +8,8 @@ end_color="\e[0m"
 # Thread counts
 threads=(1 2 4 8 16)
 
-# Thread counts
-sizes=(3)
+# Matrix sizes
+sizes=(8 16 32 64 128 256 512 1024)
 
 # Script start
 echo -e "Execute omp test script"
