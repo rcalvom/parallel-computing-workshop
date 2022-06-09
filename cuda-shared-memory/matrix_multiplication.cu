@@ -64,8 +64,8 @@ __global__ void multiply_matrices_kernel(int* matrix_a, int* matrix_b, int* matr
         int* sumbatrix_a = matrix_a + matrix_size * block_count * block_row + block_count * i;
         int* sumbatrix_b = matrix_b + matrix_size * block_count * i + block_count * block_col;
 
-        __shared__ int shared_a[16][16];
-        __shared__ int shared_b[16][16];
+        __shared__ int shared_a[8][8];
+        __shared__ int shared_b[8][8];
 
         shared_a[thread_row][thread_col] = *(sumbatrix_a + thread_row * matrix_size + thread_col);
         shared_b[thread_row][thread_col] = *(sumbatrix_b + thread_row * matrix_size + thread_col);
