@@ -5,17 +5,20 @@ green="\e[32m"
 blue="\e[34m"
 end_color="\e[0m"
 
+# Block counts
+blocks=(1 2 4 8 16 32 64)
+
 # Thread counts
-threads=(1 2 4 8 16)
+threads=(1 2 4 8 16 32 64 128)
 
 # Matrix sizes
 sizes=(8 16 32 64 128 256 512 1024)
 
 # Script start
-echo -e "Execute omp test script"
+echo -e "Execute cuda test script"
 echo -e
 
-# Compile omp matrix multiplication program
+# Compile cuda matrix multiplication program
 echo -e "${blue}Compiling program...${end_color}"
 make build
 echo -e "${green}Done${end_color}"
@@ -36,15 +39,18 @@ echo -e
 # Execute all test cases and save their results in the output folder
 for size in "${sizes[@]}"
 do
-    for thread in "${threads[@]}"
+    for block in "${blocks[@]}"
     do
-        echo -e "${blue}Matrix size: $size, Threads: $thread ${end_color}"
-        echo -e "${blue}Executing test...${end_color}"
-        OUTPUT=`./matrix_multiplication input_matrices/a_${size}_matrix.txt input_matrices/b_${size}_matrix.txt  output_matrices/c_${size}_matrix.txt ${size} ${thread}`
-        echo -e ${OUTPUT}
-        echo -e ${OUTPUT} >> out/"omp_size_${size}_threads_${thread}.out"
-        echo -e "${green}Done${end_color}"
-        echo -e
+        for thread in "${threads[@]}"
+        do
+            echo -e "${blue}Matrix size: $size, Blocks: $block, Threads: $thread ${end_color}"
+            echo -e "${blue}Executing test...${end_color}"
+            OUTPUT=`./matrix_multiplication input_matrices/a_${size}_matrix.txt input_matrices/b_${size}_matrix.txt  output_matrices/c_${size}_matrix.txt ${size} ${block} ${thread}`
+            echo -e ${OUTPUT}
+            echo -e ${OUTPUT} >> out/"cuda_size_${size}_blocks_${block}_threads_${thread}.out"
+            echo -e "${green}Done${end_color}"
+            echo -e
+        done
     done
 done
 

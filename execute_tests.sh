@@ -14,3 +14,10 @@ cd "${parent_directory}"
 cd omp
 ./omp_tests.sh
 echo -e
+
+# Execute CUDA Tests
+echo -e "${blue}Executing CUDA Tests...${end_color}"
+cd "${parent_directory}"
+cd cuda
+./cuda_tests.sh
+echo -e

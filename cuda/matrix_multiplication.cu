@@ -54,7 +54,7 @@ __global__ void multiply_matrices_kernel(int* matrix_a, int* matrix_b, int* matr
     long start = (matrix_size * matrix_size) / (block_count * thread_count) * id;
     long end = (matrix_size * matrix_size) / (block_count * thread_count) * (id + 1);
 
-    for(long index = start; i < end; i++){
+    for(long index = start; index < end; index++){
         int i = index / matrix_size;
         int j = index % matrix_size;
         int value = 0;
@@ -77,6 +77,12 @@ __global__ void multiply_matrices_kernel(int* matrix_a, int* matrix_b, int* matr
  * @param thread_count Number of Threds executed
  */
 void matrix_multiplication(char * matrix_a_filename, char* matrix_b_filename, char* matrix_c_filename, int matrix_size, int block_count, int thread_count){
+    /**
+     * @brief Generate matrices with random data
+     * 
+     */
+    generate_matrix(matrix_a_filename, matrix_size);
+    generate_matrix(matrix_b_filename, matrix_size);
 
     /**
      * @brief Load matrices from files
@@ -128,6 +134,7 @@ void matrix_multiplication(char * matrix_a_filename, char* matrix_b_filename, ch
         exit(EXIT_FAILURE);
     }
 
+    int* matrix_c = (int*) malloc(sizeof(int) * matrix_size * matrix_size);
     cudaMemcpy(matrix_c, matrix_c_device, sizeof(int) * matrix_size * matrix_size, cudaMemcpyDeviceToHost);
     cudaDeviceSynchronize();
 
@@ -189,7 +196,7 @@ void generate_matrix(char* matrix_filename, int matrix_size) {
  * @return Matrix Readed
  */
 int* read_matrix(char* matrix_filename, int matrix_size){
-    int* matrix = malloc(sizeof(int) * matrix_size * matrix_size);
+    int* matrix = (int*) malloc(sizeof(int) * matrix_size * matrix_size);
     if(matrix == NULL){
         perror("The memory couldn't be allocated. Aborting");
         exit(EXIT_FAILURE);
@@ -204,35 +211,6 @@ int* read_matrix(char* matrix_filename, int matrix_size){
     }
     fclose(file);
     return matrix;
-}
-
-/**
- * @brief Multiply two matrices A and B
- * 
- * @param matrix_a Matrix A
- * @param matrix_b Matrix B
- * @param matrix_size Matrix size
- * @param thread_count Number of Threads to excecute
- * @return Matrix C (A * B)
- */
-int* multiply_matrices(int* matrix_a, int* matrix_b, int matrix_size, int thread_count){
-    int* matrix_c = malloc(sizeof(int) * matrix_size * matrix_size);
-    if(matrix_c == NULL){
-        perror("The memory couldn't be allocated. Aborting");
-        exit(EXIT_FAILURE);
-    }
-    omp_set_num_threads(thread_count);
-    #pragma omp parallel for
-    for(int index = 0; index < matrix_size * matrix_size; index++){
-        int i = index / matrix_size;
-        int j = index % matrix_size;
-        int value = 0;
-        for(int k = 0; k < matrix_size; k++){
-            value += *(matrix_a + ( i * matrix_size) + k) * *(matrix_b + (matrix_size * k) + j);
-        }
-        *(matrix_c + (i * matrix_size) + j) = value;
-    }
-    return matrix_c;
 }
 
 /**
