@@ -48,7 +48,7 @@ extern "C" {
  * @param matrix_size Matrix size
  * @param block_count Number of Threds executed
  */
-__global__ void multiply_matrices_kernel(int* matrix_a, int* matrix_b, int* matrix_c, int matrix_size, int block_count){
+__global__ void multiply_matrices_kernel(int* matrix_a, int* matrix_b, int* matrix_c, int matrix_size, const int block_count){
 
     int block_col = blockIdx.x;
     int block_row = blockIdx.y;
@@ -64,9 +64,8 @@ __global__ void multiply_matrices_kernel(int* matrix_a, int* matrix_b, int* matr
         int* sumbatrix_a = matrix_a + matrix_size * block_count * block_row + block_count * i;
         int* sumbatrix_b = matrix_b + matrix_size * block_count * i + block_count * block_col;
 
-        enum { shared_size = block_count };
-        __shared__ int shared_a[shared_size][shared_size];
-        __shared__ int shared_b[shared_size][shared_size];
+        __shared__ int shared_a[block_count][block_count];
+        __shared__ int shared_b[block_count][block_count];
 
         shared_a[thread_row][thread_col] = *(sumbatrix_a + thread_row * matrix_size + thread_col);
         shared_b[thread_row][thread_col] = *(sumbatrix_b + thread_row * matrix_size + thread_col);
@@ -147,7 +146,7 @@ void matrix_multiplication(char * matrix_a_filename, char* matrix_b_filename, ch
     dim3 dimBlock(block_count, block_count);
     dim3 dimGrid(matrix_size / dimBlock.x, matrix_size / dimBlock.y);
 
-    multiply_matrices_kernel<<<dimGrid, dimBlock>>>(matrix_a_device, matrix_b_device, matrix_c_device, matrix_size);
+    multiply_matrices_kernel<<<dimGrid, dimBlock>>>(matrix_a_device, matrix_b_device, matrix_c_device, matrix_size, const block_count);
     cudaDeviceSynchronize();
     if (cudaGetLastError() != cudaSuccess){
         perror("Has been ocurr an error in kernel execution. Aborting");
