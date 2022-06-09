@@ -14,6 +14,17 @@ cd = os.path.dirname(os.path.abspath(__file__))
 blocks = [1, 2, 4, 8, 16, 32, 64]
 threads = [1, 2, 4, 8, 16, 32, 64, 128]
 
+seq_times = {
+    '8': 0.000039,
+    '16': 0.000054,
+    '32': 0.000284,
+    '64': 0.001898,
+    '128': 0.013747,
+    '256': 0.109696,
+    '512': 0.649004,
+    '1024': 6.888434
+}
+
 
 def generate_plots():
     """Generate plots from data"""
@@ -46,7 +57,7 @@ def generate_plots():
         ax2.set(xlabel='Number of threads', ylabel='Speedup (s)',
                 title=f'N° of Threads vs Speedup ({m_type})')
         ax2.grid()
-        seq_time = np.average(m_results[1][1])
+        seq_time = seq_times[m_type]
         for block_count, b_results in m_results.items():
             par_times = []
             for thread in threads:
