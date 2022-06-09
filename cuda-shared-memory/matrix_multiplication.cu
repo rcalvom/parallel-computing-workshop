@@ -64,22 +64,23 @@ __global__ void multiply_matrices_kernel(int* matrix_a, int* matrix_b, int* matr
         int* sumbatrix_a = matrix_a + matrix_size * block_count * block_row + block_count * i;
         int* sumbatrix_b = matrix_b + matrix_size * block_count * i + block_count * block_col;
 
-        __shared__ int shared_a[block_count][block_count];
-        __shared__ int shared_b[block_count][block_count];
+        const int shared_size = block_count;
+        __shared__ int shared_a[shared_size][shared_size];
+        __shared__ int shared_b[shared_size][shared_size];
 
-        shared_a[row][col] = *(sumbatrix_a + row * matrix_size + col);
-        shared_b[row][col] = *(sumbatrix_b + row * matrix_size + col);
+        shared_a[thread_row][thread_col] = *(sumbatrix_a + thread_row * matrix_size + thread_col);
+        shared_b[thread_row][thread_col] = *(sumbatrix_b + thread_row * matrix_size + thread_col);
 
         __syncthreads();
 
         for (int j = 0; j < block_count; j++){
-            value += shared_a[row][j] * shared_b[j][col];
+            value += shared_a[thread_row][j] * shared_b[j][thread_col];
         }
 
         __syncthreads();
 
     }
-    *(sumbatrix_c + row * matrix_size + col) = value;
+    *(sumbatrix_c + thread_row * matrix_size + thread_col) = value;
 }
 
 
