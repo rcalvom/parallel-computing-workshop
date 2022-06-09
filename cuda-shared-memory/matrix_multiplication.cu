@@ -146,7 +146,7 @@ void matrix_multiplication(char * matrix_a_filename, char* matrix_b_filename, ch
     dim3 dimBlock(block_count, block_count);
     dim3 dimGrid(matrix_size / dimBlock.x, matrix_size / dimBlock.y);
 
-    multiply_matrices_kernel<<<dimGrid, dimBlock>>>(matrix_a_device, matrix_b_device, matrix_c_device, matrix_size, const block_count);
+    multiply_matrices_kernel<<<dimGrid, dimBlock>>>(matrix_a_device, matrix_b_device, matrix_c_device, matrix_size, block_count);
     cudaDeviceSynchronize();
     if (cudaGetLastError() != cudaSuccess){
         perror("Has been ocurr an error in kernel execution. Aborting");
