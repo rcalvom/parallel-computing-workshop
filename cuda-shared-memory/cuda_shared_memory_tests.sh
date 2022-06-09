@@ -6,7 +6,7 @@ blue="\e[34m"
 end_color="\e[0m"
 
 # Block counts
-blocks=(1 2 4 8 16 32 64)
+blocks=(40)
 
 # Matrix sizes
 sizes=(8 16 32 64 128 256 512 1024)
