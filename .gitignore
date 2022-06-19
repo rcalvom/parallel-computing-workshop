@@ -1,6 +1,6 @@
-output_images/*
-report/out/*
-report/plots/*
+*/output_images/*
+*/report/out/*
+*/report/plots/*
 border_detection
 .vscode
 venv/

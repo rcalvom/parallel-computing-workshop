@@ -48,13 +48,13 @@ int main(int argc, char* argv[]){
     char* input_filename = argv[1];
     char* output_filename = argv[2];
     double filter_intensity = atof(argv[3]);
-    int threads_count = atoi(argv[4]);
+    int process_count = atoi(argv[4]);
     
     struct timeval start, end;
     double stopwatch;
     gettimeofday(&start, NULL);
 
-    border_detection_filter(input_filename, output_filename, filter_intensity, threads_count);
+    border_detection_filter(input_filename, output_filename, filter_intensity, process_count);
 
     gettimeofday(&end, NULL);
     stopwatch = (double)(end.tv_sec + (double) end.tv_usec / 1000000) - (double)(start.tv_sec + (double) start.tv_usec / 1000000);

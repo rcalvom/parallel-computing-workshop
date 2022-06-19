@@ -13,8 +13,8 @@
 // Standard input/output library
 #include <stdio.h>
 
-// Open mp library
-#include <omp.h>
+// Open mpi library
+#include <mpi.h>
 
 // Stb image library
 #define STB_IMAGE_IMPLEMENTATION
@@ -32,9 +32,9 @@
  * @param input_filename Input file path
  * @param output_filename Output file path
  * @param filter_intensity Border detection filter intensity
- * @param threads_count Numer of threads to process the image
+ * @param process_count Numer of processes to process the image
  */
-void border_detection_filter(char* input_filename, char* output_filename, double filter_intensity, int threads_count){
+void border_detection_filter(char* input_filename, char* output_filename, double filter_intensity, int process_count){
     /**
      * @brief Load the image form file to memory
      * 
@@ -57,56 +57,57 @@ void border_detection_filter(char* input_filename, char* output_filename, double
         exit(EXIT_FAILURE);
     }
     /**
-     * @brief Define variables to threads
+     * @brief Define variables to processes
      * 
      */
-    struct border_detection_thread_input *data = malloc(threads_count * sizeof(struct border_detection_thread_input));
+    struct border_detection_process_input *data = malloc(process_count * sizeof(struct border_detection_process_input));
     if(data == NULL){
         perror("The memory couldn't be allocated. Aborting");
         exit(EXIT_FAILURE);
     }
-    for(int i = 0; i < threads_count; i++){
-        (data + i)->start = image_size / threads_count * i;
-        (data + i)->end = image_size / threads_count * (i + 1);
+    for(int i = 0; i < process_count; i++){
+        (data + i)->start = image_size / process_count * i;
+        (data + i)->end = image_size / process_count * (i + 1);
     }
     /**
-     * @brief Create and execute the threads to grayscale the image
+     * @brief Create and execute the processes to grayscale the image
      * 
      */
-    #pragma omp parallel num_threads(threads_count) 
-    {
-        int id = omp_get_thread_num();
-        for(int i = (data + id)->start; i < (data + id)->end; i++){
-            *(grayscale_image + i) = rbg_to_grayscale(*(input_image + 3 * i), *(input_image + 3 * i + 1), *(input_image + 3 * i + 2));
-        }
+    int id;
+    MPI_Init(&argc, &argv);
+	MPI_Comm_rank(MPI_COMM_WORLD, &id);
+    for(int i = (data + id)->start; i < (data + id)->end; i++){
+        *(grayscale_image + i) = rbg_to_grayscale(*(input_image + 3 * i), *(input_image + 3 * i + 1), *(input_image + 3 * i + 2));
     }
+    MPI_Finalize();
+    
     /**
-     * @brief Create and execute the threads to apply border filter to the image
+     * @brief Create and execute the processes to apply border filter to the image
      * 
      */
-    #pragma omp parallel num_threads(threads_count) 
-    {
-        int id = omp_get_thread_num();
-        for(int i = (data + id)->start; i < (data + id)->end; i++){
-            int p11 = (i % width == 0 || i < width) ? 0 : *(grayscale_image + i - width - 1);
-            int p12 = (i < width) ? 0 : *(grayscale_image + i - width);
-            int p13 = (i % width == width - 1 || i < width) ? 0 : *(grayscale_image + i - width + 1);
-            int p21 = (i % width == 0) ? 0 : *(grayscale_image + i - 1);
-            int p22 = *(grayscale_image + i);
-            int p23 = (i % width == width - 1) ? 0 : *(grayscale_image + i + 1);
-            int p31 = (i % width == 0 || i + width >= width * height) ? 0 : *(grayscale_image + i + width - 1);
-            int p32 = (i + width >= width * height) ? 0 : *(grayscale_image + i + width);
-            int p33 = (i % width == width - 1 || i + width >= width * height) ? 0 : *(grayscale_image + i + width + 1);
-            int result = (-filter_intensity * p11) + (-filter_intensity * p12) + (-filter_intensity * p13) + (-filter_intensity * p21) + (8 * filter_intensity * p22) + (-filter_intensity * p23) + (-filter_intensity * p31) + (-filter_intensity * p32) + (-filter_intensity * p33);
-            if(result < 0){
-                *(output_image + i) = 0;
-            }else if(result > 255){
-                *(output_image + i) = 255;
-            }else{
-                *(output_image + i) = result;
-            }
+    int id;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &id);
+    for(int i = (data + id)->start; i < (data + id)->end; i++){
+        int p11 = (i % width == 0 || i < width) ? 0 : *(grayscale_image + i - width - 1);
+        int p12 = (i < width) ? 0 : *(grayscale_image + i - width);
+        int p13 = (i % width == width - 1 || i < width) ? 0 : *(grayscale_image + i - width + 1);
+        int p21 = (i % width == 0) ? 0 : *(grayscale_image + i - 1);
+        int p22 = *(grayscale_image + i);
+        int p23 = (i % width == width - 1) ? 0 : *(grayscale_image + i + 1);
+        int p31 = (i % width == 0 || i + width >= width * height) ? 0 : *(grayscale_image + i + width - 1);
+        int p32 = (i + width >= width * height) ? 0 : *(grayscale_image + i + width);
+        int p33 = (i % width == width - 1 || i + width >= width * height) ? 0 : *(grayscale_image + i + width + 1);
+        int result = (-filter_intensity * p11) + (-filter_intensity * p12) + (-filter_intensity * p13) + (-filter_intensity * p21) + (8 * filter_intensity * p22) + (-filter_intensity * p23) + (-filter_intensity * p31) + (-filter_intensity * p32) + (-filter_intensity * p33);
+        if(result < 0){
+            *(output_image + i) = 0;
+        }else if(result > 255){
+            *(output_image + i) = 255;
+        }else{
+            *(output_image + i) = result;
         }
     }
+    MPI_Finalize();
     /**
      * @brief Save the generated image to a file
      * 

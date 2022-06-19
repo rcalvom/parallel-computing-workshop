@@ -12,9 +12,3 @@ sudo systemctl restart nfs-kernel-server
 
 # Export Networl File System Folder
 sudo exportfs -a
-
-# Compile MPI Project
-mpicc pi.c -o pi -lm -fopenmp
-
-# Run MPI Project
-mpirun -np 5 --hostfile mpi-hosts ./pi
