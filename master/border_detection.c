@@ -4,7 +4,7 @@
  * @author Jorge Aurelio Morales Manrique (jomorales@unal.edu.co)
  * @brief Process a picture with a border detection filter.
  * @version 1.0
- * @date 2022-05-07
+ * @date 2022-06-19
  * 
  * @copyright Copyright (c) 2022
  * 

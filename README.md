@@ -18,7 +18,7 @@
 
     * Creará las carpetas necesarias para las ejecuciones
     * Compilará el proyecto escrito en el lenguaje C usando el comando `make build`
-    * Ejecutará los test de aplicación de filtro a las imágenes con los tamaños 4k, 1080p y 720p con 1, 2, 4, 8 hilos.
+    * Ejecutará los test de aplicación de filtro a las imágenes con los tamaños 4k, 1080p y 720p con uso de 1 a 16 procesos.
     * Se generarán las gráficas de tiempos y speed up usando un script de python y la libreria matplotlib
     * Compilará el reporte final usando `pdflatex`
     
