@@ -2,7 +2,7 @@
 
 # Install required packages
 sudo apt-get update
-sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
+sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev nfs-common
 
 # Create folder for mount NFS partition
 mkdir -p parallel-computing-workshop 
