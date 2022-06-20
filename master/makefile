@@ -1,7 +1,7 @@
 CC = mpicc
 
 build: main.c border_detection.c border_detection.h
-	@ $(CC) border_detection.c main.c -o border_detection -lm -fopenmp
+	@ $(CC) border_detection.c main.c -o border_detection -lm
 
 clean: border_detection
 	@ rm border_detection

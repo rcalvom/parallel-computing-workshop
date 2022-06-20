@@ -4,6 +4,7 @@
 localhost slots=2
 
 # The following slave nodes are single processor machines:
+node-0
 node-1
 node-2
 node-3

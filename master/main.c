@@ -19,14 +19,8 @@
 // Standard input/output library
 #include <stdio.h>
 
-// Time library
-#include <time.h>
-
-// System time library
-#include <sys/time.h>
-
-// System wait library
-#include <sys/wait.h>
+// Open mpi library
+#include <mpi.h>
 
 // Border detection library
 #include "border_detection.h"
@@ -39,7 +33,6 @@
  * @return Exit status
  */
 int main(int argc, char* argv[]){
-
     if(argc != 5){
         perror("The program has not enought arguments. Aborting.");
         exit(EXIT_FAILURE);
@@ -49,18 +42,27 @@ int main(int argc, char* argv[]){
     char* output_filename = argv[2];
     double filter_intensity = atof(argv[3]);
     int process_count = atoi(argv[4]);
-    
-    struct timeval start, end;
-    double stopwatch;
-    gettimeofday(&start, NULL);
 
+
+    int id;
+    MPI_Init(&argc, &argv);
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &id);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    double start = MPI_Wtime();
+    
     border_detection_filter(input_filename, output_filename, filter_intensity, process_count);
 
-    gettimeofday(&end, NULL);
-    stopwatch = (double)(end.tv_sec + (double) end.tv_usec / 1000000) - (double)(start.tv_sec + (double) start.tv_usec / 1000000);
+    MPI_Barrier(MPI_COMM_WORLD);
+    double end = MPI_Wtime();
 
-    printf("The program has finished sucessfully.\n");
-    printf("Time execution: %f\n", stopwatch);
+    MPI_Finalize();
 
+    if(id == 0){
+        printf("The program has finished sucessfully.\n");
+        printf("Time execution: %f\n", end - start);
+    }
+    
     return 0;
 }
