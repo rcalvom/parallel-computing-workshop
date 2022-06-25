@@ -49,7 +49,7 @@ do
     do
         echo -e "${blue}Size: $size, Processes: $process ${end_color}"
         echo -e "${blue}Executing test...${end_color}"
-        OUTPUT=`mpirun -np $process --hostfile mpi-hosts ./border_detection input_images/$size.jpg output_images/$size.jpg $filter_intensity $process`
+        OUTPUT=$(mpirun -np $process --hostfile mpi-hosts ./border_detection input_images/$size.jpg output_images/$size.jpg $filter_intensity $process)
         echo -e ${OUTPUT}
         echo -e ${OUTPUT} >> report/out/"border_detection_${size}_${process}.out"
         echo -e "${green}Done${end_color}"
