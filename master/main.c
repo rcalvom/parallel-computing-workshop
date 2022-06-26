@@ -33,15 +33,16 @@
  * @return Exit status
  */
 int main(int argc, char* argv[]){
-    if(argc != 5){
+    if(argc != 6){
         perror("The program has not enought arguments. Aborting.");
         exit(EXIT_FAILURE);
     }
 
     char* input_filename = argv[1];
-    char* output_filename = argv[2];
-    double filter_intensity = atof(argv[3]);
-    int process_count = atoi(argv[4]);
+    char* grayscale_filename = argv[2];
+    char* output_filename = argv[3];
+    double filter_intensity = atof(argv[4]);
+    int process_count = atoi(argv[5]);
 
 
     int id;
@@ -52,7 +53,7 @@ int main(int argc, char* argv[]){
     MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
     
-    border_detection_filter(input_filename, output_filename, filter_intensity, process_count);
+    border_detection_filter(input_filename, grayscale_filename, output_filename, filter_intensity, process_count);
 
     MPI_Barrier(MPI_COMM_WORLD);
     double end = MPI_Wtime();

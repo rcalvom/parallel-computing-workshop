@@ -30,11 +30,12 @@
  * @brief Apply the border detection filter to a given input file and write it in a given output file
  * 
  * @param input_filename Input file path
+ * @param grayscale_filename Grayscale file path
  * @param output_filename Output file path
  * @param filter_intensity Border detection filter intensity
  * @param process_count Numer of processes to process the image
  */
-void border_detection_filter(char* input_filename, char* output_filename, double filter_intensity, int process_count){
+void border_detection_filter(char* input_filename, char* grayscale_filename, char* output_filename, double filter_intensity, int process_count){
     /**
      * @brief Get rank of current process
      * 
@@ -49,21 +50,10 @@ void border_detection_filter(char* input_filename, char* output_filename, double
 
     int width, height, channels;
     unsigned char* input_image;
-    if(id == 0){
-        input_image = stbi_load(input_filename, &width, &height, &channels, 3);
-            
-        if(input_image == NULL){
-            perror("The image couldn't be readed. Aborting");
-            exit(EXIT_FAILURE);
-        }
+    input_image = stbi_load(input_filename, &width, &height, &channels, 3);
+    if(input_image == NULL){
+        exit(EXIT_FAILURE);
     }
-    /**
-     * @brief Send image attributes to nodes
-     * 
-     */
-    MPI_Bcast(&width, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&height, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&channels, 1, MPI_INT, 0, MPI_COMM_WORLD);
     
     /**
      * @brief Allocate memory for grayscale generated image
@@ -76,7 +66,6 @@ void border_detection_filter(char* input_filename, char* output_filename, double
         exit(EXIT_FAILURE);
     }
     
-
     /**
      * @brief Allocate memory for final generated image
      * 
@@ -99,10 +88,9 @@ void border_detection_filter(char* input_filename, char* output_filename, double
     int start = (width * height) / process_count * id;
     int end = (width * height) / process_count * (id + 1);
     size_t image_size_process = end - start;
-    unsigned char* input_image_process = malloc(3 * image_size_process);
-    unsigned char* grayscale_image_process = malloc(width * height);
+    unsigned char* grayscale_image_process = malloc(image_size_process);
     unsigned char* output_image_process = malloc(image_size_process);
-    if(input_image_process == NULL || grayscale_image_process == NULL || output_image_process == NULL){
+    if(grayscale_image_process == NULL || output_image_process == NULL){
         perror("The memory couldn't be allocated. Aborting");
         exit(EXIT_FAILURE);
     }
@@ -112,23 +100,44 @@ void border_detection_filter(char* input_filename, char* output_filename, double
      * @brief Scatter the image to another nodes
      * 
      */ 
-    MPI_Scatter(input_image, 3 * image_size_process, MPI_UNSIGNED_CHAR, input_image_process, 3 * image_size_process, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
-    
+    double s_t1, e_t1;
 
     /**
      * @brief Create and execute the processes to grayscale the image
      * 
      */
     for(int i = 0; i < image_size_process; i++){
-        *(grayscale_image_process + i) = rbg_to_grayscale(*(input_image_process + 3 * i), *(input_image_process + 3 * i + 1), *(input_image_process + 3 * i + 2));
-    }   
+        *(grayscale_image_process + i) = rbg_to_grayscale(*(input_image + 3 * (start + i)), *(input_image + 3 * (start + i) + 1), *(input_image + 3 * (start + i) + 2));
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
 
      /**
      * @brief Gather grayscale image and broadcast it to all nodes 
      * 
      */ 
+    MPI_Barrier(MPI_COMM_WORLD);
+    s_t1 = MPI_Wtime();
     MPI_Gather(grayscale_image_process, image_size_process, MPI_UNSIGNED_CHAR, grayscale_image, image_size_process, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
-    MPI_Bcast(grayscale_image, width * height, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
+    e_t1 = MPI_Wtime();
+    if (id == 0) {
+        printf("MPI_Gather: %f\n", e_t1 - s_t1);
+    }
+    if(id == 0){
+        int status = stbi_write_jpg(grayscale_filename, width, height, 1, grayscale_image, 100);
+        if(status == 0){
+            perror("The output image couldn't be saved. Aborting");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    free(grayscale_image);
+    MPI_Barrier(MPI_COMM_WORLD);
+    grayscale_image = stbi_load(grayscale_filename, &width, &height, &channels, 1);
+    if(grayscale_image == NULL){
+        perror("The output image couldn't be loaded. Aborting");
+        exit(EXIT_FAILURE);
+    }
 
     /**
      * @brief Create and execute the processes to apply border filter to the image
@@ -158,8 +167,14 @@ void border_detection_filter(char* input_filename, char* output_filename, double
      * @brief Gather the image to master nodes
      * 
      */
-    
+    MPI_Barrier(MPI_COMM_WORLD);
+    s_t1 = MPI_Wtime();
     MPI_Gather(output_image_process, image_size_process, MPI_UNSIGNED_CHAR, output_image, image_size_process, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
+    e_t1 = MPI_Wtime();
+    if (id == 0) {
+        printf("MPI_Gather: %f\n", e_t1 - s_t1);
+    }
 
     /**
      * @brief Save the generated image to a file
@@ -183,7 +198,6 @@ void border_detection_filter(char* input_filename, char* output_filename, double
         free(grayscale_image);
         free(output_image);
     }
-    free(input_image_process);
     free(grayscale_image_process);
     free(output_image_process);
 }
