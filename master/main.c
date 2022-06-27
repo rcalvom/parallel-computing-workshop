@@ -61,8 +61,7 @@ int main(int argc, char* argv[]){
     MPI_Finalize();
 
     if(id == 0){
-        printf("The program has finished sucessfully.\n");
-        printf("Time execution: %f\n", end - start);
+        printf("The program has finished sucessfully. Time execution: %f\n", end - start);
     }
     
     return 0;
